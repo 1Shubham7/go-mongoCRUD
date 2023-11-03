@@ -4,20 +4,32 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"gopkg.in/mgo.v2"
 	"net/http"
-	"github.com/1shubham7/go-mongo-crud/handlers"
+	"github.com/1shubham7/go-mongo-crud/controllers"
 )
 
 func main() {
 
 	router := httprouter.New()
-	router.GET("/users", handlers.GetAllUsers)
-	router.GET("/user/:id", handlers.GetUserById)
+	uc := controllers.NewUserController(getSession())
 
-	router.DELETE("delete/user/:id, handlers.DeleteUserById")
+	router.GET("/users", uc.GetAllUsers)
+	router.GET("/user/:id", uc.GetUserById)
 
-	router.POST("add/user/:id", handlers.AddUserById)
+	router.DELETE("delete/user/:id", uc.DeleteUserById)
 
-	router.PUT("update/user/:id", handlers.UpdateUserBuId)
+	router.POST("add/user/:id", uc.AddUserById)
+
+	router.PUT("update/user/:id", uc.UpdateUserBuId)
 	
+	http.ListenAndServe(":8080", router)
+}
 
+func getSession() *mgo.Session {
+	s, err := mgo.Dial("moongodb://localhost:27107")
+	// this is basically a mongo db session
+
+	if err!= nil{
+		panic(err)
+	}
+	return s
 }
